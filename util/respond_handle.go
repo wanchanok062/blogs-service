@@ -2,6 +2,7 @@ package util
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"github.com/sirupsen/logrus"
 )
 
 type ErrorResponse struct {
@@ -16,7 +17,7 @@ func HandleError(c *fiber.Ctx, message string, err string, statusCode int) error
 		Message:     message,
 		ErrorDetail: err,
 	}
-
+	logrus.Error(err)
 	c.Status(statusCode)
 	return c.JSON(response)
 }

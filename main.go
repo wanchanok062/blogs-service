@@ -9,6 +9,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/limiter"
 	"github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 	"github.com/wanchanok6698/web-blogs/api/v1/routes"
 	"github.com/wanchanok6698/web-blogs/config"
 )
@@ -26,6 +27,10 @@ func main() {
 	if port == "" {
 		port = "3000"
 	}
+
+	logrus.SetFormatter(&logrus.TextFormatter{
+		ForceColors: true,
+	})
 
 	app := fiber.New()
 	app.Use(logger.New())
