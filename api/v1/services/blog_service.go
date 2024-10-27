@@ -13,7 +13,6 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type BlogService struct {
@@ -44,7 +43,6 @@ func (bs *BlogService) GetAllBlogs(ctx context.Context, filterOptions models.Fil
 	}
 
 	sortOptions := bson.M{}
-
 	if filterOptions.Sort != "" {
 		sortFields := strings.Split(filterOptions.Sort, ":")
 		log.Println(sortFields)
@@ -56,7 +54,24 @@ func (bs *BlogService) GetAllBlogs(ctx context.Context, filterOptions models.Fil
 		sortOptions[field] = order
 	}
 
-	cursor, err := bs.Collection.Find(ctx, filter, options.Find().SetSort(sortOptions))
+	pipeline := mongo.Pipeline{
+		{{Key: "$match", Value: filter}},
+		{{Key: "$lookup", Value: bson.D{
+			{Key: "from", Value: "author"},
+			{Key: "localField", Value: "authorid"},
+			{Key: "foreignField", Value: "authorID"},
+			{Key: "as", Value: "author_info"},
+		}}},
+		{{Key: "$unwind", Value: bson.D{
+			{Key: "path", Value: "$author_info"},
+			{Key: "preserveNullAndEmptyArrays", Value: true},
+		}}},
+	}
+
+	if len(sortOptions) > 0 {
+		pipeline = append(pipeline, bson.D{{Key: "$sort", Value: sortOptions}})
+	}
+	cursor, err := bs.Collection.Aggregate(ctx, pipeline)
 	if err != nil {
 		return nil, err
 	}
@@ -79,6 +94,7 @@ func (bs *BlogService) GetBlogByID(ctx context.Context, id string) (*models.Blog
 
 func (bs *BlogService) CreateBlog(ctx context.Context, blog *models.BlogPost) (*models.BlogPost, error) {
 	blog.PostID = primitive.NewObjectID().Hex()
+
 	blog.CreatedAt = time.Now()
 	blog.UpdatedAt = time.Now()
 

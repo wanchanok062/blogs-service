@@ -5,12 +5,17 @@ import (
 )
 
 type BlogPost struct {
-	PostID    string    `json:"id" bson:"id"`
-	Title     string    `json:"title" validate:"required"`
-	Content   string    `json:"content"  validate:"required"`
-	AuthorID  string    `json:"authorId"  validate:"required"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	PostID     string     `json:"id" bson:"id"`
+	Title      string     `json:"title" validate:"required"`
+	Content    string     `json:"content"  validate:"required"`
+	AuthorID   string     `json:"authorId"  validate:"required"`
+	CreatedAt  time.Time  `json:"createdAt"`
+	UpdatedAt  time.Time  `json:"updatedAt"`
+	AuthorInfo AuthorInfo `json:"author" bson:"author_info"`
+}
+
+type AuthorInfo struct {
+	Name string `json:"name"`
 }
 
 type BlogUpdate struct {
