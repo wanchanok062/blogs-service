@@ -1,0 +1,12 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  app:
+    build: .
+    image: blogs-service:1.0
+    container_name: blogs-service
+    env_file:
+      - .env
+    ports:
+      - "3033:3033"
